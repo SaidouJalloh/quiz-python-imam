@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Python Complet - Cours Imam</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #3b82f6, #1e40af);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .quiz-nav {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #f8fafc;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 0.9em;
+        }
+
+        .nav-btn.active {
+            background: #3b82f6;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .quiz-section {
+            display: none;
+            padding: 30px;
+        }
+
+        .quiz-section.active {
+            display: block;
+        }
+
+        .question {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3b82f6;
+        }
+
+        .question h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .code-block {
+            background: #1a1a1a;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .option {
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+
+        .option.correct {
+            border-color: #10b981;
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .option.incorrect {
+            border-color: #ef4444;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .check-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .check-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .check-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .result.correct {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .result.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .score {
+            text-align: center;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .score h3 {
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            transition: width 0.3s ease;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #1e293b;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .correct {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .nav-btn {
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+
+            .container {
+                margin: 10px;
+            }
+
+            .quiz-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐍 Quiz Python Complet</h1>
+            <p>Variables, Opérateurs, Listes et Dictionnaires</p>
+        </div>
+
+        <div class="quiz-nav">
+            <button class="nav-btn active" onclick="showSection('variables')">Variables</button>
+            <button class="nav-btn" onclick="showSection('operateurs')">Opérateurs</button>
+            <button class="nav-btn" onclick="showSection('listes')">Listes</button>
+            <button class="nav-btn" onclick="showSection('dictionnaires')">Dictionnaires</button>
+            <button class="nav-btn" onclick="showSection('fstrings')">F-Strings</button>
+            <button class="nav-btn" onclick="showSection('avance')">Avancé</button>
+        </div>
+
+        <!-- Section Variables -->
+        <div id="variables" class="quiz-section active">
+            <h2 class="section-title">🔤 Variables et Types</h2>
+
+            <div class="question" data-answer="0">
+                <h3>Question 1: Quelle est la syntaxe correcte pour créer une variable en Python ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">nom = "Pierre"</div>
+                    <div class="option" onclick="selectOption(this, 1)">var nom = "Pierre"</div>
+                    <div class="option" onclick="selectOption(this, 2)">string nom = "Pierre"</div>
+                    <div class="option" onclick="selectOption(this, 3)">declare nom = "Pierre"</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="2">
+                <h3>Question 2: Que affiche ce code ?</h3>
+                <div class="code-block">age = 25<br>age = age + 5<br>print(age)</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">25</div>
+                    <div class="option" onclick="selectOption(this, 1)">255</div>
+                    <div class="option" onclick="selectOption(this, 2)">30</div>
+                    <div class="option" onclick="selectOption(this, 3)">Erreur</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="1">
+                <h3>Question 3: Quel type de données est la variable suivante ?</h3>
+                <div class="code-block">temperature = 36.5</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">int</div>
+                    <div class="option" onclick="selectOption(this, 1)">float</div>
+                    <div class="option" onclick="selectOption(this, 2)">str</div>
+                    <div class="option" onclick="selectOption(this, 3)">bool</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="3">
+                <h3>Question 4: Parmi ces noms de variables, lequel est INCORRECT ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">nom_utilisateur</div>
+                    <div class="option" onclick="selectOption(this, 1)">_variable</div>
+                    <div class="option" onclick="selectOption(this, 2)">prix_1</div>
+                    <div class="option" onclick="selectOption(this, 3)">2nom</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="1">
+                <h3>Question 5: Que représente la valeur None en Python ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">Le nombre zéro</div>
+                    <div class="option" onclick="selectOption(this, 1)">L'absence de valeur</div>
+                    <div class="option" onclick="selectOption(this, 2)">Une chaîne vide</div>
+                    <div class="option" onclick="selectOption(this, 3)">False</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+        </div>
+
+        <!-- Section Opérateurs -->
+        <div id="operateurs" class="quiz-section">
+            <h2 class="section-title">⚡ Opérateurs</h2>
+
+            <div class="question" data-answer="2">
+                <h3>Question 1: Que vaut cette expression ?</h3>
+                <div class="code-block">15 // 4</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">3.75</div>
+                    <div class="option" onclick="selectOption(this, 1)">4</div>
+                    <div class="option" onclick="selectOption(this, 2)">3</div>
+                    <div class="option" onclick="selectOption(this, 3)">Erreur</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="1">
+                <h3>Question 2: Après ce code, que vaut x ?</h3>
+                <div class="code-block">x = 10<br>x += 5<br>x *= 2</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">20</div>
+                    <div class="option" onclick="selectOption(this, 1)">30</div>
+                    <div class="option" onclick="selectOption(this, 2)">25</div>
+                    <div class="option" onclick="selectOption(this, 3)">15</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="0">
+                <h3>Question 3: Que vaut cette expression logique ?</h3>
+                <div class="code-block">age = 17<br>a_permis = True<br>peut_conduire = age >= 18 and a_permis</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">False</div>
+                    <div class="option" onclick="selectOption(this, 1)">True</div>
+                    <div class="option" onclick="selectOption(this, 2)">17</div>
+                    <div class="option" onclick="selectOption(this, 3)">Erreur</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="2">
+                <h3>Question 4: Selon la priorité des opérateurs, que vaut cette expression ?</h3>
+                <div class="code-block">2 + 3 * 5</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">25</div>
+                    <div class="option" onclick="selectOption(this, 1)">10</div>
+                    <div class="option" onclick="selectOption(this, 2)">17</div>
+                    <div class="option" onclick="selectOption(this, 3)">13</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="1">
+                <h3>Question 5: Que vaut cette expression avec OR ?</h3>
+                <div class="code-block">est_weekend = False<br>est_ferie = True<br>peut_se_reposer = est_weekend or
+                    est_ferie</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">False</div>
+                    <div class="option" onclick="selectOption(this, 1)">True</div>
+                    <div class="option" onclick="selectOption(this, 2)">None</div>
+                    <div class="option" onclick="selectOption(this, 3)">Erreur</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+        </div>
+
+        <!-- Section Listes -->
+        <div id="listes" class="quiz-section">
+            <h2 class="section-title">📋 Listes</h2>
+
+            <div class="question" data-answer="1">
+                <h3>Question 1: Comment créer une liste vide en Python ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">liste = ()</div>
+                    <div class="option" onclick="selectOption(this, 1)">liste = []</div>
+                    <div class="option" onclick="selectOption(this, 2)">liste = {}</div>
+                    <div class="option" onclick="selectOption(this, 3)">liste = ""</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="2">
+                <h3>Question 2: Que affiche ce code ?</h3>
+                <div class="code-block">ma_liste = ["Imam", 2, 3, True, 3.3]<br>print(ma_liste[-2])</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">3.3</div>
+                    <div class="option" onclick="selectOption(this, 1)">3</div>
+                    <div class="option" onclick="selectOption(this, 2)">True</div>
+                    <div class="option" onclick="selectOption(this, 3)">2</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="2">
+                <h3>Question 3: Comment ajouter un élément à la fin d'une liste ?</h3>
+                <div class="code-block">ma_liste = [1, 2, 3]</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">ma_liste.add(4)</div>
+                    <div class="option" onclick="selectOption(this, 1)">ma_liste.insert(4)</div>
+                    <div class="option" onclick="selectOption(this, 2)">ma_liste.append(4)</div>
+                    <div class="option" onclick="selectOption(this, 3)">ma_liste.push(4)</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="0">
+                <h3>Question 4: Que produit cette concaténation ?</h3>
+                <div class="code-block">liste1 = ["tigre", "chien"]<br>liste2 = ["mouton", "chèvre"]<br>resultat =
+                    liste1 + liste2<br>print(len(resultat))</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">4</div>
+                    <div class="option" onclick="selectOption(this, 1)">2</div>
+                    <div class="option" onclick="selectOption(this, 2)">6</div>
+                    <div class="option" onclick="selectOption(this, 3)">Erreur</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="1">
+                <h3>Question 5: Que génère list(range(5, 10)) ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">[5, 6, 7, 8, 9, 10]</div>
+                    <div class="option" onclick="selectOption(this, 1)">[5, 6, 7, 8, 9]</div>
+                    <div class="option" onclick="selectOption(this, 2)">[6, 7, 8, 9, 10]</div>
+                    <div class="option" onclick="selectOption(this, 3)">[0, 1, 2, 3, 4, 5]</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="3">
+                <h3>Question 6: Comment accéder aux éléments du 2ème au dernier dans une liste ?</h3>
+                <div class="code-block">ma_liste = ["a", "b", "c", "d", "e"]</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">ma_liste[2:]</div>
+                    <div class="option" onclick="selectOption(this, 1)">ma_liste[2:-1]</div>
+                    <div class="option" onclick="selectOption(this, 2)">ma_liste[1:4]</div>
+                    <div class="option" onclick="selectOption(this, 3)">ma_liste[1:]</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+        </div>
+
+        <!-- Section Dictionnaires -->
+        <div id="dictionnaires" class="quiz-section">
+            <h2 class="section-title">🗂️ Dictionnaires</h2>
+
+            <div class="question" data-answer="1">
+                <h3>Question 1: Comment créer un dictionnaire en Python ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">dict = ["nom": "Jean"]</div>
+                    <div class="option" onclick="selectOption(this, 1)">dict = {"nom": "Jean"}</div>
+                    <div class="option" onclick="selectOption(this, 2)">dict = ("nom": "Jean")</div>
+                    <div class="option" onclick="selectOption(this, 3)">dict = <"nom": "Jean">
+                    </div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="0">
+                <h3>Question 2: Comment accéder à la valeur "Paris" ?</h3>
+                <div class="code-block">personne = {"nom": "Dupont", "ville": "Paris"}</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">personne["ville"]</div>
+                    <div class="option" onclick="selectOption(this, 1)">personne.ville</div>
+                    <div class="option" onclick="selectOption(this, 2)">personne(ville)</div>
+                    <div class="option" onclick="selectOption(this, 3)">personne{"ville"}</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="2">
+                <h3>Question 3: Comment ajouter une nouvelle paire clé-valeur ?</h3>
+                <div class="code-block">personne = {"nom": "Jean"}</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">personne.add("age", 30)</div>
+                    <div class="option" onclick="selectOption(this, 1)">personne.append("age": 30)</div>
+                    <div class="option" onclick="selectOption(this, 2)">personne["age"] = 30</div>
+                    <div class="option" onclick="selectOption(this, 3)">personne.insert("age", 30)</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="1">
+                <h3>Question 4: Quelle est la caractéristique principale des clés dans un dictionnaire ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">Elles peuvent être dupliquées</div>
+                    <div class="option" onclick="selectOption(this, 1)">Elles doivent être uniques</div>
+                    <div class="option" onclick="selectOption(this, 2)">Elles sont toujours des chaînes</div>
+                    <div class="option" onclick="selectOption(this, 3)">Elles sont toujours des nombres</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="0">
+                <h3>Question 5: Comment supprimer la clé "age" d'un dictionnaire ?</h3>
+                <div class="code-block">personne = {"nom": "Jean", "age": 30}</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">del personne["age"]</div>
+                    <div class="option" onclick="selectOption(this, 1)">personne.remove("age")</div>
+                    <div class="option" onclick="selectOption(this, 2)">personne.delete("age")</div>
+                    <div class="option" onclick="selectOption(this, 3)">personne.pop_all("age")</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+        </div>
+
+        <!-- Section F-Strings -->
+        <div id="fstrings" class="quiz-section">
+            <h2 class="section-title">🔤 F-Strings</h2>
+
+            <div class="question" data-answer="1">
+                <h3>Question 1: Quelle est la syntaxe correcte pour une f-string ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">"Bonjour {nom}"</div>
+                    <div class="option" onclick="selectOption(this, 1)">f"Bonjour {nom}"</div>
+                    <div class="option" onclick="selectOption(this, 2)">s"Bonjour {nom}"</div>
+                    <div class="option" onclick="selectOption(this, 3)">format"Bonjour {nom}"</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="2">
+                <h3>Question 2: Que affiche ce code d'après le cours d'Imam ?</h3>
+                <div class="code-block">Nom = "Diallo"<br>Age = 50<br>print(f"Mon nom est {Nom}, j'ai {Age} ans")</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">Mon nom est nom, j'ai age ans</div>
+                    <div class="option" onclick="selectOption(this, 1)">Mon nom est {Nom}, j'ai {Age} ans</div>
+                    <div class="option" onclick="selectOption(this, 2)">Mon nom est Diallo, j'ai 50 ans</div>
+                    <div class="option" onclick="selectOption(this, 3)">Erreur</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="0">
+                <h3>Question 3: Comment afficher un calcul dans une f-string ?</h3>
+                <div class="code-block">a = 20<br>b = 7</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">f"Addition: {a + b}"</div>
+                    <div class="option" onclick="selectOption(this, 1)">f"Addition: a + b"</div>
+                    <div class="option" onclick="selectOption(this, 2)">f"Addition: {a} + {b}"</div>
+                    <div class="option" onclick="selectOption(this, 3)">f"Addition: (a + b)"</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="1">
+                <h3>Question 4: Comment formater un nombre avec 2 décimales ?</h3>
+                <div class="code-block">prix = 19.99876</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">f"Prix: {prix:.2}"</div>
+                    <div class="option" onclick="selectOption(this, 1)">f"Prix: {prix:.2f}"</div>
+                    <div class="option" onclick="selectOption(this, 2)">f"Prix: {prix:2f}"</div>
+                    <div class="option" onclick="selectOption(this, 3)">f"Prix: {prix.2f}"</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+        </div>
+
+        <!-- Section Avancé -->
+        <div id="avance" class="quiz-section">
+            <h2 class="section-title">🚀 Concepts Avancés</h2>
+
+            <div class="question" data-answer="1">
+                <h3>Question 1: Concernant la mutabilité, qu'est-ce qui change l'ID d'une variable ?</h3>
+                <div class="code-block">a = 3<br>print(id(a))<br>a = 5<br>print(id(a))</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">L'ID reste le même</div>
+                    <div class="option" onclick="selectOption(this, 1)">L'ID change car les int sont immutables</div>
+                    <div class="option" onclick="selectOption(this, 2)">C'est une erreur</div>
+                    <div class="option" onclick="selectOption(this, 3)">L'ID change aléatoirement</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="0">
+                <h3>Question 2: Quelle est la différence entre une liste et un tuple concernant la mutabilité ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">Les listes sont mutables, les tuples immutables
+                    </div>
+                    <div class="option" onclick="selectOption(this, 1)">Les tuples sont mutables, les listes immutables
+                    </div>
+                    <div class="option" onclick="selectOption(this, 2)">Les deux sont mutables</div>
+                    <div class="option" onclick="selectOption(this, 3)">Les deux sont immutables</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="2">
+                <h3>Question 3: Combien de mots-clés (keywords) Python y a-t-il environ ?</h3>
+                <div class="code-block">import keyword<br>print(len(keyword.kwlist))</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">25</div>
+                    <div class="option" onclick="selectOption(this, 1)">30</div>
+                    <div class="option" onclick="selectOption(this, 2)">35</div>
+                    <div class="option" onclick="selectOption(this, 3)">40</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="1">
+                <h3>Question 4: Que se passe-t-il avec l'ID quand on modifie une liste ?</h3>
+                <div class="code-block">malist = ["imam",
+                    "said"]<br>print(id(malist))<br>malist.append("Diallo")<br>print(id(malist))</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">L'ID change</div>
+                    <div class="option" onclick="selectOption(this, 1)">L'ID reste le même (liste mutable)</div>
+                    <div class="option" onclick="selectOption(this, 2)">Erreur</div>
+                    <div class="option" onclick="selectOption(this, 3)">L'ID devient None</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="0">
+                <h3>Question 5: Dans l'ordre de priorité des opérateurs, lequel est le PLUS prioritaire ?</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">Parenthèses ()</div>
+                    <div class="option" onclick="selectOption(this, 1)">Puissance **</div>
+                    <div class="option" onclick="selectOption(this, 2)">Multiplication *</div>
+                    <div class="option" onclick="selectOption(this, 3)">Addition +</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+
+            <div class="question" data-answer="3">
+                <h3>Question 6: Que fait cette fonction sur une liste de nombres ?</h3>
+                <div class="code-block">nombres = [10, 5, 8, 20, 3]<br>print(min(nombres))</div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 0)">Affiche 20</div>
+                    <div class="option" onclick="selectOption(this, 1)">Affiche la somme</div>
+                    <div class="option" onclick="selectOption(this, 2)">Affiche la longueur</div>
+                    <div class="option" onclick="selectOption(this, 3)">Affiche 3 (minimum)</div>
+                </div>
+                <button class="check-btn" onclick="checkAnswer(this)" disabled>Vérifier</button>
+            </div>
+        </div>
+
+        <div class="score">
+            <h3>📊 Score Global</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <p id="scoreText">0 / 0 questions répondues</p>
+            <p id="detailScore"></p>
+        </div>
+    </div>
+
+    <script>
+        let scores = {
+            variables: { correct: 0, total: 5 },
+            operateurs: { correct: 0, total: 5 },
+            listes: { correct: 0, total: 6 },
+            dictionnaires: { correct: 0, total: 5 },
+            fstrings: { correct: 0, total: 4 },
+            avance: { correct: 0, total: 6 }
+        };
+
+        let answeredQuestions = new Set();
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.quiz-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        function selectOption(option, index) {
+            const question = option.closest('.question');
+            const options = question.querySelectorAll('.option');
+            const checkBtn = question.querySelector('.check-btn');
+
+            // Remove selection from other options
+            options.forEach(opt => opt.classList.remove('selected'));
+
+            // Select current option
+            option.classList.add('selected');
+
+            // Enable check button
+            checkBtn.disabled = false;
+
+            // Store selected answer
+            question.setAttribute('data-selected', index);
+        }
+
+        function checkAnswer(button) {
+            const question = button.closest('.question');
+            const correctAnswer = parseInt(question.getAttribute('data-answer'));
+            const selectedAnswer = parseInt(question.getAttribute('data-selected'));
+            const options = question.querySelectorAll('.option');
+            const questionId = Array.from(question.parentNode.children).indexOf(question);
+            const sectionId = question.closest('.quiz-section').id;
+
+            // Create unique question identifier
+            const uniqueId = `${sectionId}-${questionId}`;
+
+            // Mark options as correct or incorrect
+            options.forEach((option, index) => {
+                if (index === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (index === selectedAnswer && index !== correctAnswer) {
+                    option.classList.add('incorrect');
+                }
+                option.style.pointerEvents = 'none';
+            });
+
+            // Show result
+            let resultDiv = question.querySelector('.result');
+            if (!resultDiv) {
+                resultDiv = document.createElement('div');
+                resultDiv.className = 'result';
+                question.appendChild(resultDiv);
+            }
+
+            // Update score only if not already answered
+            if (!answeredQuestions.has(uniqueId)) {
+                answeredQuestions.add(uniqueId);
+
+                if (selectedAnswer === correctAnswer) {
+                    resultDiv.className = 'result correct';
+                    resultDiv.innerHTML = '✅ Excellente réponse ! Bien joué !';
+                    scores[sectionId].correct++;
+                } else {
+                    resultDiv.className = 'result incorrect';
+                    const correctOption = options[correctAnswer].textContent;
+                    resultDiv.innerHTML = `❌ Incorrect. La bonne réponse était : "${correctOption}"`;
+                }
+
+                updateGlobalScore();
+            }
+
+            // Disable button
+            button.disabled = true;
+            button.textContent = 'Répondu';
+        }
+
+        function updateGlobalScore() {
+            let totalCorrect = 0;
+            let totalQuestions = 0;
+            let sectionDetails = [];
+
+            Object.entries(scores).forEach(([section, score]) => {
+                totalCorrect += score.correct;
+                totalQuestions += score.total;
+
+                const sectionNames = {
+                    'variables': 'Variables',
+                    'operateurs': 'Opérateurs',
+                    'listes': 'Listes',
+                    'dictionnaires': 'Dictionnaires',
+                    'fstrings': 'F-Strings',
+                    'avance': 'Avancé'
+                };
+
+                if (score.correct > 0 || answeredQuestions.size > 0) {
+                    const percentage = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
+                    sectionDetails.push(`${sectionNames[section]}: ${score.correct}/${score.total} (${percentage}%)`);
+                }
+            });
+
+            const percentage = totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0;
+
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('scoreText').textContent =
+                `${totalCorrect} / ${totalQuestions} questions correctes (${Math.round(percentage)}%)`;
+
+            if (sectionDetails.length > 0) {
+                document.getElementById('detailScore').textContent = sectionDetails.join(' • ');
+            }
+
+            // Change progress bar color based on score
+            const progressBar = document.getElementById('progressBar');
+            if (percentage >= 80) {
+                progressBar.style.background = '#10b981'; // Green
+            } else if (percentage >= 60) {
+                progressBar.style.background = '#f59e0b'; // Orange
+            } else {
+                progressBar.style.background = '#ef4444'; // Red
+            }
+        }
+
+        // Initialize score display
+        updateGlobalScore();
+    </script>
+</body>
+
+</html>
